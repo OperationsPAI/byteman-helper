@@ -19,6 +19,9 @@ public class SQLParser {
 
     public static SQLInfo parseSQL(String sql) {
         System.out.println("parseSQL: " + sql);
+        if (sql == null) {
+            return new SQLInfo(new ArrayList(), new ArrayList(), "");
+        }
         List<String> dbTableList = new ArrayList();
         List<String> tableList = new ArrayList();
         List<String> dbList = new ArrayList();
@@ -83,6 +86,10 @@ public class SQLParser {
 
     public static boolean matchDBTable(String database, String sql, String filterDatabase, String filterTable, String sqlType) {
         System.out.println("database: " + database + ", sql: " + sql + ", filterDatabase: " + filterDatabase + ", filterTable: " + filterTable + ", sqlType: " + sqlType);
+        if (sql == null) {
+            System.out.println("matchDBTable: sql is null after extraction, cannot match");
+            return false;
+        }
         SQLInfo sqlInfo = SQLParser.parseSQL(sql);
         sqlInfo.dbList.add(database);
 
