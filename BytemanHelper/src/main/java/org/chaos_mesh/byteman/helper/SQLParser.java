@@ -93,19 +93,32 @@ public class SQLParser {
         SQLInfo sqlInfo = SQLParser.parseSQL(sql);
         sqlInfo.dbList.add(database);
 
-        if (sqlType != null && sqlType != "") {
-            if (sqlInfo.type != sqlType) {
+        if (sqlType != null && !sqlType.isEmpty()) {
+            if (!sqlType.equals(sqlInfo.type)) {
                 return false;
             }
         }
 
-        if (filterDatabase != null && filterDatabase != "") {
-            if (!sqlInfo.dbList.contains(filterDatabase)) {
+        // Only enforce the database filter when the SQL actually qualifies the
+        // table with a database (e.g. `db.table`). Connection-pool apps
+        // (Hibernate, MyBatis, HikariCP, Spring Data JPA) select a default
+        // schema and query unqualified tables (`from user`), so the parsed
+        // dbList carries no real database — those implicitly target the
+        // connection's database and must still match.
+        if (filterDatabase != null && !filterDatabase.isEmpty()) {
+            boolean hasQualifiedDatabase = false;
+            for (String db : sqlInfo.dbList) {
+                if (db != null && !db.isEmpty()) {
+                    hasQualifiedDatabase = true;
+                    break;
+                }
+            }
+            if (hasQualifiedDatabase && !sqlInfo.dbList.contains(filterDatabase)) {
                 return false;
             }
         }
 
-        if (filterTable != null && filterTable != "") {
+        if (filterTable != null && !filterTable.isEmpty()) {
             if (!sqlInfo.tableList.contains(filterTable)) {
                 return false;
             }
